@@ -30,7 +30,8 @@ public class MenuManager
             Console.WriteLine("11. Show products by specified supplier");
             Console.WriteLine("12. Show the oldest product in the warehouse");
             Console.WriteLine("13. Show average quantity per product type");
-            Console.WriteLine("14. Exit");
+            Console.WriteLine("14. Enter your own SQL query");
+            Console.WriteLine("15. Exit");
             Console.Write("Your choice: ");
 
             string choice = Console.ReadLine();
@@ -81,6 +82,9 @@ public class MenuManager
                     dbManager.ShowAverageQuantityByProductType();
                     break;
                 case "14":
+                    dbManager.ExecuteUserQuery();
+                    break;
+                case "15":
                     exit = true;
                     break;
                 default:

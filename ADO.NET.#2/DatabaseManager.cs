@@ -59,20 +59,79 @@ public class DatabaseManager
             return;
         }
 
-        using (SqlCommand command = new SqlCommand(query, connection))
+        try
         {
-            using (SqlDataReader reader = command.ExecuteReader())
+            using (SqlCommand command = new SqlCommand(query, connection))
             {
-                while (reader.Read())
+                using (SqlDataReader reader = command.ExecuteReader())
                 {
-                    for (int i = 0; i < reader.FieldCount; i++)
+                    while (reader.Read())
                     {
-                        Console.Write(reader[i] + " ");
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            Console.Write(reader[i] + " ");
+                        }
+                        Console.WriteLine();
                     }
-                    Console.WriteLine();
                 }
             }
         }
+        catch (SqlException ex)
+        {
+            Console.WriteLine("SQL query error: " + ex.Message);
+        }
+    }
+
+    public void ExecuteUserQuery()
+    {
+        Console.Write("Enter your SQL query: ");
+        string query = Console.ReadLine()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            Console.WriteLine("Query cannot be empty.");
+            return;
+        }
+
+        if (ContainsUnsafeSql(query))
+        {
+            Console.WriteLine("Unsafe SQL query detected. Execution is denied.");
+            return;
+        }
+
+        try
+        {
+            ExecuteAndPrintQuery(query);
+        }
+        catch (SqlException ex)
+        {
+            Console.WriteLine("SQL execution error: " + ex.Message);
+        }
+    }
+
+    private bool ContainsUnsafeSql(string query)
+    {
+        string lowerQuery = query.ToLower();
+        //"Небезпечні" або "небажані" команди
+        string[] forbiddenKeywords = {
+        "drop", "delete", "truncate", "alter", "update", "insert",
+        "exec", "execute", "--", ";--", "xp_", "sp_", "shutdown"
+    };
+
+        foreach (string keyword in forbiddenKeywords)
+        {
+            if (lowerQuery.Contains(keyword))
+            {
+                return true;
+            }
+        }
+        //SQL injection
+        if (lowerQuery.Split(';').Length > 2)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public void ShowProductsByCategory(int categoryId)
