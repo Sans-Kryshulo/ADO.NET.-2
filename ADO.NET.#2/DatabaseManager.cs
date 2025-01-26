@@ -53,6 +53,7 @@ public class DatabaseManager
 
     public void ExecuteAndPrintQuery(string query)
     {
+        /*
         if (connection == null || connection.State == System.Data.ConnectionState.Closed)
         {
             Console.WriteLine("Database connection is not established.");
@@ -79,6 +80,26 @@ public class DatabaseManager
         catch (SqlException ex)
         {
             Console.WriteLine("SQL query error: " + ex.Message);
+        }
+        */
+        using (var cmd = new SqlCommand(query, connection))
+        using (var reader = cmd.ExecuteReader())
+        {
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        Console.Write(reader[i] + " ");
+                    }
+                    Console.WriteLine();
+                }
+            }
+            else
+            {
+                Console.WriteLine("No data found.");
+            }
         }
     }
 
@@ -113,10 +134,11 @@ public class DatabaseManager
     {
         string lowerQuery = query.ToLower();
         //"Небезпечні" або "небажані" команди
-        string[] forbiddenKeywords = {
-        "drop", "delete", "truncate", "alter", "update", "insert",
-        "exec", "execute", "--", ";--", "xp_", "sp_", "shutdown"
-    };
+        string[] forbiddenKeywords = 
+        {
+            "drop", "delete", "truncate", "alter", "update", "insert",
+            "exec", "execute", "--", ";--", "xp_", "sp_", "shutdown"
+        };
 
         foreach (string keyword in forbiddenKeywords)
         {
@@ -126,12 +148,15 @@ public class DatabaseManager
             }
         }
         //SQL injection
+        /*
         if (lowerQuery.Split(';').Length > 2)
         {
             return true;
         }
 
         return false;
+        */
+        return (lowerQuery.Split(';').Length > 2);
     }
 
     public void ShowProductsByCategory(int categoryId)
@@ -144,21 +169,40 @@ public class DatabaseManager
         ExecuteAndPrintQuery($"SELECT * FROM Products WHERE SupplierID = {supplierId}");
     }
 
-    public void DisplayAllProductInfo() => ExecuteAndPrintQuery("SELECT * FROM Products");
-
-    public void DisplayAllProductTypes() => ExecuteAndPrintQuery("SELECT * FROM ProductTypes");
-
-    public void DisplayAllSuppliers() => ExecuteAndPrintQuery("SELECT * FROM Suppliers");
-
-    public void ShowProductWithMaxQuantity() => ExecuteAndPrintQuery("SELECT TOP 1 * FROM Products ORDER BY Quantity DESC");
-
-    public void ShowProductWithMinQuantity() => ExecuteAndPrintQuery("SELECT TOP 1 * FROM Products ORDER BY Quantity ASC");
-
-    public void ShowProductWithMinCostPrice() => ExecuteAndPrintQuery("SELECT TOP 1 * FROM Products ORDER BY CostPrice ASC");
-
-    public void ShowProductWithMaxCostPrice() => ExecuteAndPrintQuery("SELECT TOP 1 * FROM Products ORDER BY CostPrice DESC");
-
-    public void ShowOldestProduct() => ExecuteAndPrintQuery("SELECT TOP 1 * FROM Products ORDER BY SupplyDate ASC");
-
-    public void ShowAverageQuantityByProductType() => ExecuteAndPrintQuery("SELECT TypeID, AVG(Quantity) AS AverageQuantity FROM Products GROUP BY TypeID");
+    public void DisplayAllProductInfo()
+    {
+        ExecuteAndPrintQuery("SELECT * FROM Products");
+    }
+    public void DisplayAllProductTypes()
+    {
+        ExecuteAndPrintQuery("SELECT * FROM ProductTypes");
+    }
+    public void DisplayAllSuppliers()
+    {
+        ExecuteAndPrintQuery("SELECT * FROM Suppliers");
+    }
+    public void ShowProductWithMaxQuantity()
+    {
+        ExecuteAndPrintQuery("SELECT TOP 1 * FROM Products ORDER BY Quantity DESC");
+    }
+    public void ShowProductWithMinQuantity()
+    {
+        ExecuteAndPrintQuery("SELECT TOP 1 * FROM Products ORDER BY Quantity ASC");
+    }
+    public void ShowProductWithMinCostPrice()
+    {
+        ExecuteAndPrintQuery("SELECT TOP 1 * FROM Products ORDER BY CostPrice ASC");
+    }
+    public void ShowProductWithMaxCostPrice()
+    {
+        ExecuteAndPrintQuery("SELECT TOP 1 * FROM Products ORDER BY CostPrice DESC");
+    }
+    public void ShowOldestProduct()
+    {
+        ExecuteAndPrintQuery("SELECT TOP 1 * FROM Products ORDER BY SupplyDate ASC");
+    }
+    public void ShowAverageQuantityByProductType()
+    {
+        ExecuteAndPrintQuery("SELECT TypeID, AVG(Quantity) AS AverageQuantity FROM Products GROUP BY TypeID");
+    }
 }
