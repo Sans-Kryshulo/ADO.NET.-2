@@ -85,7 +85,7 @@ public class DatabaseManager
         using (var cmd = new SqlCommand(query, connection))
         using (var reader = cmd.ExecuteReader())
         {
-            if (reader.HasRows)
+            if (reader.HasRows) //reader.HasRows = true - є якісь рядки
             {
                 while (reader.Read())
                 {
@@ -96,7 +96,7 @@ public class DatabaseManager
                     Console.WriteLine();
                 }
             }
-            else
+            else // reader.HasRows = false - немає рядків
             {
                 Console.WriteLine("No data found.");
             }
